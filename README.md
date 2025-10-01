@@ -1,6 +1,6 @@
 # Waveshare RP2350-LCD-0.96
 
--  Raspberry Pi Pico 2
+-  Raspberry Pi Pico 2 MCU
 -  Onboard a 0.96-inch LCD ST7735s 160x80
 -  https://www.waveshare.com/wiki/RP2350-LCD-0.96
 
