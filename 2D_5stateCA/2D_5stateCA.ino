@@ -51,24 +51,23 @@ void rndseed(){
 void updateGrid() {
 
   for (int x = 0; x < WIDTH; x++) {
+
     for (int y = 0; y < HEIGHT; y++) {
+
       int current_state = grid[x][y];
-      // Počet sousedů pro každý stav
       int neighborCounts[5] = {0, 0, 0, 0, 0};
       for (int dx = -1; dx <= 1; dx++) {
         for (int dy = -1; dy <= 1; dy++) {
           if (dx == 0 && dy == 0) continue;
-          int nx = (x + dx + WIDTH) % WIDTH; // Toroidní okraje
+          int nx = (x + dx + WIDTH) % WIDTH;
           int ny = (y + dy + HEIGHT) % HEIGHT;
           neighborCounts[grid[nx][ny]]++;
         }
       }
-      // Pravidla:
-      // - Pokud má >=3 sousedy v následujícím stavu (X+1), přejde na X+1
-      // - Pokud má <2 sousedy ve svém stavu (X), vrátí se na X-1
-      // - Jinak zůstane ve svém stavu
+
       int next_state = (current_state + 1) % 5;
-      int prev_state = (current_state - 1 + 5) % 5; // +5 pro správný modul
+      int prev_state = (current_state - 1 + 5) % 5;
+
       if (neighborCounts[next_state] >= 3) {
         newGrid[x][y] = next_state;
       } else if (neighborCounts[current_state] < 2) {
@@ -77,13 +76,15 @@ void updateGrid() {
         newGrid[x][y] = current_state;
       }
     }
+
   }
-  // Kopírování nové mřížky
+
   for (int x = 0; x < WIDTH; x++) {
-    for (int y = 0; y < HEIGHT; y++) {
-      grid[x][y] = newGrid[x][y];
-    }
+
+    for (int y = 0; y < HEIGHT; y++) grid[x][y] = newGrid[x][y];
+
   }
+
 }
 
 
@@ -91,12 +92,16 @@ int countNeighbors(int x, int y) {
 
   int count = 0;
   for (int dx = -1; dx <= 1; dx++) {
+
     for (int dy = -1; dy <= 1; dy++) {
-      if (dx == 0 && dy == 0) continue; // Přeskoč sebe
-      int nx = (x + dx + WIDTH) % WIDTH; // Toroidní okraje
+
+      if (dx == 0 && dy == 0) continue;
+      int nx = (x + dx + WIDTH) % WIDTH;
       int ny = (y + dy + HEIGHT) % HEIGHT;
       if (grid[nx][ny] >= 1) count++;
+
     }
+    
   }
 
   return count;
