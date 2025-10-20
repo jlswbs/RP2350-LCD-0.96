@@ -5,7 +5,6 @@
 
 #define WIDTH   80
 #define HEIGHT  160
-#define SCR     WIDTH*HEIGHT
 
 #define PIN_SCK    10
 #define PIN_MOSI   11
@@ -31,7 +30,7 @@ void initialize_grid() {
   for (int x = 0; x < SIZE_X; x++) {
     for (int y = 0; y < SIZE_Y; y++) {
       for (int z = 0; z < SIZE_Z; z++) {
-        grid[x][y][z] = (random(100) < 30) ? 1 : 0;
+        grid[x][y][z] = (random(100) < 20) ? 1 : 0;
       }
     }
   }
@@ -137,9 +136,9 @@ void loop() {
 
   prepare_display_grid();
 
-  for (int x = 0; x < SIZE_X; x++) {
+  for (int y = 0; y < SIZE_Y; y++) {
 
-    for (int y = 0; y < SIZE_Y; y++) {
+    for (int x = 0; x < SIZE_X; x++) {
 
       uint8_t coll = display_grid[x][y];
       tft.TFTfillRectangle(CELL_SIZE * x, CELL_SIZE * y, CELL_DRAW_SIZE, CELL_DRAW_SIZE, tft.Color565(coll, coll, coll));
