@@ -113,6 +113,7 @@ static inline void seed_random_from_rosc() {
     random = (random << 1) | random_bit;
   }
   srand(random);
+  randomSeed(random);
 }
 
 void setup() {
