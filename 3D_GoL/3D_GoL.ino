@@ -21,7 +21,7 @@ ST7735_TFT tft;
 
 #define SIZE_X (WIDTH / CELL_SIZE)
 #define SIZE_Y (HEIGHT / CELL_SIZE)
-#define SIZE_Z (WIDTH / CELL_SIZE)
+#define SIZE_Z (HEIGHT / CELL_SIZE)
 
 uint8_t grid[SIZE_X][SIZE_Y][SIZE_Z];
 uint8_t new_grid[SIZE_X][SIZE_Y][SIZE_Z];
@@ -31,7 +31,7 @@ void initialize_grid() {
   for (int x = 0; x < SIZE_X; x++) {
     for (int y = 0; y < SIZE_Y; y++) {
       for (int z = 0; z < SIZE_Z; z++) {
-        grid[x][y][z] = (random(100) < 20) ? 1 : 0;
+        grid[x][y][z] = (random(100) < 30) ? 1 : 0;
       }
     }
   }
@@ -94,7 +94,7 @@ void prepare_display_grid() {
         }
       }
       if (max_z >= 0) {
-        display_grid[x][y] = 15 + (max_z * 240) / SIZE_Z;
+        display_grid[x][y] = (max_z * 255) / SIZE_Z;
       }
     }
   }
@@ -117,14 +117,18 @@ static inline void seed_random_from_rosc() {
 }
 
 void setup() {
+
   seed_random_from_rosc();
+
   tft.TFTInitSPIType(62500, spi1);
   tft.TFTSetupGPIO(PIN_RST, PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI);
   tft.TFTInitScreenSize(26, 1, WIDTH, HEIGHT);
   tft.TFTInitPCBType(TFT_PCBtype_e::TFT_ST7735S_Black);
   tft.TFTchangeInvertMode(true);
   tft.TFTfillScreen(ST7735_BLACK);
+
   initialize_grid();
+
 }
 
 void loop() {
@@ -134,10 +138,14 @@ void loop() {
   prepare_display_grid();
 
   for (int x = 0; x < SIZE_X; x++) {
+
     for (int y = 0; y < SIZE_Y; y++) {
+
       uint8_t coll = display_grid[x][y];
-      tft.TFTdrawPixel(CELL_SIZE * x, CELL_SIZE * y, tft.Color565(coll, coll, coll));
+      tft.TFTfillRectangle(CELL_SIZE * x, CELL_SIZE * y, CELL_DRAW_SIZE, CELL_DRAW_SIZE, tft.Color565(coll, coll, coll));
+
     }
+
   }
 
 }
