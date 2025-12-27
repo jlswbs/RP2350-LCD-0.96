@@ -48,12 +48,12 @@ void rndrule() {
   stepOffset = randomf(0.01f, 0.03f);
   blurFactor = randomf(0.7f, 0.9f);
 
-  levels = (int)(log(max(WIDTH, HEIGHT)) / logf(base)) - 1;
+  levels = (int)(log(fmaxf(WIDTH, HEIGHT)) / logf(base)) - 1;
   blurlevels = (int)((levels + 1) * blurFactor);
 
-  for (i = 0; i < levels; i++) {
-    int r = (int)powf(base, i);
-    radii[i] = max(1, min(r, 32));
+  for (int i = 0; i < levels; i++) {
+    int maxRadius = fminf(WIDTH, HEIGHT) / 3;
+    radii[i] = fminf((int)powf(base, i), maxRadius);
     stepSizes[i] = logf(radii[i]) * stepScale + stepOffset;
   }
 

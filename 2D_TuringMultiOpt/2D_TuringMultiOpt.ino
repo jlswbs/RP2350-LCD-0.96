@@ -17,7 +17,7 @@
 
 float randomf(float minf, float maxf) {return minf + (rand()%(1UL << 31))*(maxf - minf) / (1UL << 31);} 
   
-  #define MAX_LEVELS 32
+  #define MAX_LEVELS 64
 
 int level, i, x, y;
 int blurlevels;
@@ -53,7 +53,7 @@ static inline void set_variation(int idx, uint16_t var) {
     
 void rndrule() {
 
-  base = randomf(1.5f, 2.0f);
+  base = randomf(1.5f, 1.9f);
   levels = (int)(logf(fmaxf(WIDTH, HEIGHT)) / logf(base)) - 1;
   if (levels > MAX_LEVELS) levels = MAX_LEVELS;
   if (levels < 4) levels = 4;
@@ -63,11 +63,10 @@ void rndrule() {
   blurFactor = randomf(0.7f, 0.9f);
   blurlevels = (int)fmaxf(0, (levels + 1) * blurFactor - 0.5f);
 
-  for (i = 0; i < levels; i++) {
-    int radius = (int)powf(base, i);
-    radii[i] = radius;
-    stepSizes[i] = logf(radius) * stepScale + stepOffset;
-    if (radii[i] > 32) radii[i] = 32;
+  for (int i = 0; i < levels; i++) {
+    int maxRadius = fminf(WIDTH, HEIGHT) / 3;
+    radii[i] = fminf((int)powf(base, i), maxRadius);
+    stepSizes[i] = logf(radii[i]) * stepScale + stepOffset;
   }
 
   for (i = 0; i < SCR; i++) grid[i] = randomf(-1.0f, 1.0f);
