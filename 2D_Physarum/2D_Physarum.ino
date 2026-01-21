@@ -15,10 +15,12 @@
 
   ST7735_TFT tft;
 
-#define ITER  40000
-#define NUM   10
+#define ITER  2000
+#define NUM   8
+#define MAX_TRAIL 100
 
-  uint16_t grid[WIDTH][HEIGHT]; 
+  uint16_t grid[WIDTH][HEIGHT];
+  uint16_t trail[WIDTH][HEIGHT];
   uint16_t coll[NUM];
   uint16_t image;
   int t, q;
@@ -68,59 +70,88 @@ void rndseed(){
 void nextstep(){
 
   for (int i = 0; i < ITER; i++){
-  
     int x = 2 * (1 + rand()%(WIDTH/2)-1);
     int y = 2 * (1 + rand()%(HEIGHT/2)-1);
     
-    if(grid[x][y] >= 100 && grid[x][y] < 1000){
-      
-      q = grid[x][y]/100;
-      int p = grid[x][y] - (q*100);
-      
-      if(p < 30){
-        
-        t = 1 + rand()%5;
-        if(t == 1 && grid[x+2][y] == 0){ grid[x+2][y] = q*100; grid[x+1][y] = q*100; } 
-        if(t == 2 && grid[x][y+2] == 0){ grid[x][y+2] = q*100; grid[x][y+1] = q*100; } 
-        if(t == 3 && grid[x-2][y] == 0){ grid[x-2][y] = q*100; grid[x-1][y] = q*100; } 
-        if(t == 4 && grid[x][y-2] == 0){ grid[x][y-2] = q*100; grid[x][y-1] = q*100; } 
-        grid[x][y] = grid[x][y] + 1;
-        
-      } else {
-        
-        t = 0;
-        if(grid[x+1][y] > 1) t = t + 1;
-        if(grid[x][y+1] > 1) t = t + 1;
-        if(grid[x-1][y] > 1) t = t + 1;
-        if(grid[x][y-1] > 1) t = t + 1;
-        if(t <= 1){
-          grid[x][y] = 9100;
-          grid[x+1][y] = 0;
-          grid[x][y+1] = 0;
-          grid[x-1][y] = 0;
-          grid[x][y-1] = 0; 
-        }
-      }      
-    }
-    
     if(grid[x][y] >= 1000 && grid[x][y] < 2000){
+      q = (grid[x][y]/100) - 10;
       
-      q = (grid[x][y]/100)-10;
-      if(grid[x+2][y] == 0){ grid[x+2][y] = q*100; grid[x+1][y] = q*100; }
-      if(grid[x][y+2] == 0){ grid[x][y+2] = q*100; grid[x][y+1] = q*100; }
-      if(grid[x-2][y] == 0){ grid[x-2][y] = q*100; grid[x-1][y] = q*100; }
-      if(grid[x][y-2] == 0){ grid[x][y-2] = q*100; grid[x][y-1] = q*100; }
-    
+      if(grid[x+2][y] == 0){ 
+        grid[x+2][y] = q*100; 
+        grid[x+1][y] = q*100;
+        trail[x+1][y] = 10;
+      }
+      if(grid[x][y+2] == 0){ 
+        grid[x][y+2] = q*100; 
+        grid[x][y+1] = q*100;
+        trail[x][y+1] = 10;
+      }
+      if(grid[x-2][y] == 0){ 
+        grid[x-2][y] = q*100; 
+        grid[x-1][y] = q*100;
+        trail[x-1][y] = 10;
+      }
+      if(grid[x][y-2] == 0){ 
+        grid[x][y-2] = q*100; 
+        grid[x][y-1] = q*100;
+        trail[x][y-1] = 10;
+      }
+      
+      grid[x][y] = q*100;
     }
     
-    if(grid[x][y] >= 9000){
+    if(grid[x][y] >= 100 && grid[x][y] < 1000){
+      q = grid[x][y]/100;
+
+      if(x < 2 || x >= WIDTH-2 || y < 2 || y >= HEIGHT-2) continue;
       
-      grid[x][y] = grid[x][y] - 1;
-      if(grid[x][y] < 9000) grid[x][y] = 0;
-    
+      int sensors[4];
+      sensors[0] = trail[x+2][y];
+      sensors[1] = trail[x][y+2];
+      sensors[2] = trail[x-2][y];
+      sensors[3] = trail[x][y-2];
+      
+      int maxDir = 0;
+      int maxVal = sensors[0];
+      for(int d = 1; d < 4; d++){
+        if(sensors[d] > maxVal){
+          maxVal = sensors[d];
+          maxDir = d;
+        }
+      }
+
+      int bias = rand() % 100;
+      if(bias < 70 && maxVal > 0){
+        t = maxDir + 1;
+      } else {
+        t = 1 + rand()%4;
+      }
+      
+      int dx = (t==1)?2:(t==3)?-2:0;
+      int dy = (t==2)?2:(t==4)?-2:0;
+      
+      if(x+dx < 0 || x+dx >= WIDTH || y+dy >= HEIGHT || y+dy < 0) continue;
+      
+      if(grid[x+dx][y+dy] == 0){
+        grid[x+dx][y+dy] = q*100;
+        grid[x+dx/2][y+dy/2] = q*100;
+        trail[x][y] = (trail[x][y] + 5 > MAX_TRAIL) ? MAX_TRAIL : trail[x][y] + 5;
+      }
+
+      else if(grid[x+dx][y+dy] >= 100 && grid[x+dx][y+dy] < 1000){
+        int otherQ = grid[x+dx][y+dy]/100;
+        if(otherQ != q){
+          if(rand()%2 == 0){
+            grid[x+dx][y+dy] = q*100;
+            grid[x+dx/2][y+dy/2] = q*100;
+          }
+        }
+      }
     }
+    
+    if(trail[x][y] > 0) trail[x][y] = trail[x][y] - 1;
   }
-  
+
 }
 
 void setup(){
